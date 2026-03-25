@@ -1,12 +1,9 @@
 streamlit
-fastapi
-uvicorn
 yfinance
 pandas
 numpy
-tensorflow
+tensorflow-cpu
 joblib
 pymongo[srv]
-gridfs
 plotly
 scikit-learn
