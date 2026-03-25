@@ -17,7 +17,7 @@ st.set_page_config(page_title="Tőzsdei Előrejelző", layout="wide")
 try:
     MONGO_URI = st.secrets["MONGO_URI"]
 except:
-
+    ()
 client = MongoClient(MONGO_URI)
 db = client["stock_prediction"]
 fs = gridfs.GridFS(db)
