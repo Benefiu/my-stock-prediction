@@ -1,0 +1,12 @@
+streamlit
+fastapi
+uvicorn
+yfinance
+pandas
+numpy
+tensorflow-cpu
+joblib
+pymongo[srv]
+gridfs
+plotly
+scikit-learn
