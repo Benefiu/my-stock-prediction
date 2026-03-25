@@ -17,8 +17,6 @@ st.set_page_config(page_title="Tőzsdei Előrejelző", layout="wide")
 try:
     MONGO_URI = st.secrets["MONGO_URI"]
 except:
-    # Helyi teszteléshez (GitHub-ra küldés előtt ezt törölheted vagy üresen hagyhatod)
-    MONGO_URI = "mongodb+srv://Bene:Almafa123456@stockprediction.eqtrhzr.mongodb.net/?appName=stockprediction"
 
 client = MongoClient(MONGO_URI)
 db = client["stock_prediction"]
@@ -98,16 +96,42 @@ def predict_stock_logic(ticker, start_date_str, end_date_str, forecast_days, loo
 # CSS stílusok
 st.markdown("""
 <style>
-    .metric-card { background-color: #f0f2f6; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #ddd; }
-    .trend-up { color: green; font-weight: bold; }
-    .trend-down { color: red; font-weight: bold; }
+    .metric-card {
+        background-color: #b3b3b3;
+        border-radius: 15px;
+        padding: 20px 10px;
+        text-align: center;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        font-family: 'Arial', sans-serif;
+        color: #111;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .metric-title { font-size: 14px; margin-bottom: 5px; }
+    .metric-value { font-size: 20px; font-weight: bold; }
+    .trend-up { color: #009900; font-weight: bold; font-size: 24px; }
+    .trend-down { color: #cc0000; font-weight: bold; font-size: 24px; }
+    
+    div.stButton > button:first-child {
+        background-color: #0033a0;
+        color: white;
+        border-radius: 20px;
+        padding: 10px 24px;
+        font-weight: bold;
+        width: 100%;
+        border: none;
+    }
+    div.stButton > button:first-child:hover { background-color: #002277; color: white; }
+    [data-testid="stSidebar"] { background-color: #f4f4f4; }
 </style>
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Beállítások")
 ticker = st.sidebar.selectbox("Részvény", ["AAPL", "TSLA", "MSFT", "GOOGL", "AMZN"])
 start_date = st.sidebar.date_input("Múltbeli kezdőpont", datetime.date.today() - datetime.timedelta(days=90))
-target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today() + datetime.timedelta(days=10))
+target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today())
 
 if st.sidebar.button("Futtatás"):
     today_str = datetime.date.today().strftime('%Y-%m-%d')
