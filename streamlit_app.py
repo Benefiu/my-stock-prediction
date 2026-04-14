@@ -101,7 +101,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Beállítások")
-ticker = st.sidebar.selectbox("Részvény", ["AAPL", "TSLA", "MSFT", "GOOGL", "AMZN"])
+# Hozd létre a szótárat a megjelenítendő nevekkel
+ticker_names = {
+    "AAPL": "APPLE (AAPL)",
+    "TSLA": "TESLA (TSLA)",
+    "MSFT": "MICROSOFT (MSFT)",
+    "GOOGL": "GOOGLE (GOOGL)",
+    "AMZN": "AMAZON (AMZN)"
+}
+
+# Használd a format_func-ot a megjelenítéshez
+ticker = st.sidebar.selectbox(
+    "Részvény", 
+    options=list(ticker_names.keys()), 
+    format_func=lambda x: ticker_names[x]
+)
 start_date = st.sidebar.date_input("Múltbeli kezdőpont", datetime.date.today() - datetime.timedelta(days=90))
 target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today())
 
