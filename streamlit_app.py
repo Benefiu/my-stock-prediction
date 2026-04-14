@@ -10,10 +10,9 @@ from pymongo import MongoClient
 import gridfs
 from tensorflow.keras.models import load_model
 
-# --- 1. Konfiguráció és Biztonság ---
 st.set_page_config(page_title="Tőzsdei Előrejelző", layout="wide")
 
-# MongoDB URI kezelése (Secrets-ből vagy fallback)
+# MongoDB URI kezelése
 try:
     MONGO_URI = st.secrets["MONGO_URI"]
 except:
@@ -22,7 +21,7 @@ client = MongoClient(MONGO_URI)
 db = client["stock_prediction"]
 fs = gridfs.GridFS(db)
 
-# --- 2. Backend Logika (Adatbázis és Modell) ---
+# Backend Logika és MongoDB szinkronizáció
 
 def sync_file_from_mongodb(filename, local_path):
     """Ellenőrzi és letölti a modellt a MongoDB-ből."""
@@ -44,7 +43,6 @@ def sync_file_from_mongodb(filename, local_path):
     return True
 
 def predict_stock_logic(ticker, start_date_str, end_date_str, forecast_days, lookback_days=60):
-    """A korábbi FastAPI endpoint logikája."""
     model_path = f"models/{ticker}_model.keras"
     scaler_x_path = f"models/{ticker}_scaler_X.pkl"
     scaler_y_path = f"models/{ticker}_scaler_y.pkl"
@@ -91,7 +89,7 @@ def predict_stock_logic(ticker, start_date_str, end_date_str, forecast_days, loo
         "fut_prices": future_prices
     }, None
 
-# --- 3. UI és Megjelenítés (Frontend) ---
+# Frontend
 
 # CSS stílusok
 st.markdown("""
@@ -103,7 +101,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Beállítások")
-ticker = st.sidebar.selectbox("Részvény", ["AAPL", "TSLA", "MSFT", "GOOGL", "AMZN"])
+ticker = st.sidebar.selectbox("Részvény", ["APPLE (AAPL)", "TESLA (TSLA)", "MICROSOFT (MSFT)", "GOOGLE (GOOGL)", "AMAZON (AMZN)"])
 start_date = st.sidebar.date_input("Múltbeli kezdőpont", datetime.date.today() - datetime.timedelta(days=90))
 target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today())
 
