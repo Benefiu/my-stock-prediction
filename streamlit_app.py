@@ -101,7 +101,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Beállítások")
-# Hozd létre a szótárat a megjelenítendő nevekkel
 ticker_names = {
     "AAPL": "APPLE (AAPL)",
     "TSLA": "TESLA (TSLA)",
@@ -109,8 +108,6 @@ ticker_names = {
     "GOOGL": "GOOGLE (GOOGL)",
     "AMZN": "AMAZON (AMZN)"
 }
-
-# Használd a format_func-ot a megjelenítéshez
 ticker = st.sidebar.selectbox(
     "Részvény", 
     options=list(ticker_names.keys()), 
