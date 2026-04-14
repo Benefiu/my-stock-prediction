@@ -97,7 +97,7 @@ st.markdown("""
  .metric-card { background-color: #f0f2f6; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid #ddd; }
     .trend-up { color: green; font-weight: bold; }
     .trend-down { color: red; font-weight: bold; }
-    div[data-baseweb="select"] > div {cursor: pointer !important;}
+    div[data-baseweb="select"] > div {cursor: pointer; }
 </style>
 """, unsafe_allow_html=True)
 
