@@ -101,7 +101,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.sidebar.header("Beállítások")
-ticker = st.sidebar.selectbox("Részvény", ["APPLE (AAPL)", "TESLA (TSLA)", "MICROSOFT (MSFT)", "GOOGLE (GOOGL)", "AMAZON (AMZN)"])
+ticker = st.sidebar.selectbox("Részvény", ["AAPL", "TSLA", "MSFT", "GOOGL", "AMZN"])
 start_date = st.sidebar.date_input("Múltbeli kezdőpont", datetime.date.today() - datetime.timedelta(days=90))
 target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today())
 
