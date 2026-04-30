@@ -110,23 +110,17 @@ ticker_names = {
     "AMZN": "AMAZON (AMZN)"
 }
 ticker = st.sidebar.selectbox("Részvény", options=list(ticker_names.keys()), format_func=lambda x: ticker_names[x])
-
-# ÚJ LOGIKA: Szimulált "Ma" bevezetése
-start_date = st.sidebar.date_input("Múltbeli kezdőpont (Adatok lekérése innen)", datetime.date.today() - datetime.timedelta(days=90))
-predict_start_date = st.sidebar.date_input("Előrejelzés indítása (Szimulált 'Ma')", datetime.date.today() - datetime.timedelta(days=5)) # Ezt adtuk hozzá
+start_date = st.sidebar.date_input("Múltbeli kezdőpont", datetime.date.today() - datetime.timedelta(days=90))
 target_date = st.sidebar.date_input("Előrejelzés vége", datetime.date.today())
 
 if st.sidebar.button("Futtatás"):
-    # A valódi mai nap helyett a kiválasztott szimulált napot használjuk kiindulópontnak
-    today_str = predict_start_date.strftime('%Y-%m-%d')
+    today_str = datetime.date.today().strftime('%Y-%m-%d')
     target_str = target_date.strftime('%Y-%m-%d')
     
-    # Kiszámoljuk a munkanapokat a két megadott dátum között
     forecast_days = int(np.busday_count(today_str, target_str)) + 1
     
-    # A hibaüzenet is megváltozik, hogy a két bemenetet hasonlítsa össze
     if forecast_days <= 0:
-        st.error("Az előrejelzés vége későbbi kell legyen, mint az indítás dátuma!")
+        st.error("Válassz jövőbeli dátumot!")
     else:
         with st.spinner("Modell letöltése és számítás..."):
             res, err = predict_stock_logic(ticker, start_date.strftime("%Y-%m-%d"), today_str, min(forecast_days, 90))
