@@ -16,7 +16,8 @@ st.set_page_config(page_title="Tőzsdei Előrejelző", layout="wide")
 try:
     MONGO_URI = st.secrets["MONGO_URI"]
 except:
-    ()
+    pass # Jobb egy pass-t hagyni itt, mint az üres ()-t
+    
 client = MongoClient(MONGO_URI)
 db = client["stock_prediction"]
 fs = gridfs.GridFS(db)
@@ -42,23 +43,43 @@ def sync_file_from_mongodb(filename, local_path):
             f.write(fs.get(file_data['_id']).read())
     return True
 
-def predict_stock_logic(ticker, start_date_str, end_date_str, forecast_days, lookback_days=60):
+# 1. GYORSÍTÁS: Modell és Scaler betöltés gyorsítótárazása
+# A @st.cache_resource a memóriában (RAM) tartja a betöltött Keras objektumokat
+@st.cache_resource(show_spinner="Modell betöltése a memóriába...")
+def load_model_and_scalers(ticker):
     model_path = f"models/{ticker}_model.keras"
     scaler_x_path = f"models/{ticker}_scaler_X.pkl"
     scaler_y_path = f"models/{ticker}_scaler_y.pkl"
     
-    # Szinkronizáció
+    # Szinkronizáció - Csak akkor ellenőrzi a DB-t, ha a modell még nincs a gyorsítótárban
     if not (sync_file_from_mongodb(f"{ticker}_model.keras", model_path) and 
             sync_file_from_mongodb(f"{ticker}_scaler_X.pkl", scaler_x_path) and 
             sync_file_from_mongodb(f"{ticker}_scaler_y.pkl", scaler_y_path)):
-        return None, "Nincs modell az adatbázisban ehhez a tickerhez."
+        return None, None, None, "Nincs modell az adatbázisban ehhez a tickerhez."
 
     model = load_model(model_path)
     scaler_X = joblib.load(scaler_x_path)
     scaler_y = joblib.load(scaler_y_path)
     
+    return model, scaler_X, scaler_y, None
+
+# 2. GYORSÍTÁS: Yahoo Finance adatok gyorsítótárazása (1 óráig érvényes)
+@st.cache_data(ttl=3600, show_spinner="Piaci adatok letöltése...")
+def get_stock_data(ticker, fetch_start, end_date_str):
+    return yf.download(ticker, start=fetch_start, end=end_date_str)
+
+
+def predict_stock_logic(ticker, start_date_str, end_date_str, forecast_days, lookback_days=60):
+    
+    # Modellek lekérése a gyorsítótárból (első alkalommal lassú, utána azonnali)
+    model, scaler_X, scaler_y, err = load_model_and_scalers(ticker)
+    if err:
+        return None, err
+    
     fetch_start = (datetime.datetime.strptime(start_date_str, "%Y-%m-%d") - datetime.timedelta(days=40)).strftime("%Y-%m-%d")
-    df = yf.download(ticker, start=fetch_start, end=end_date_str)
+    
+    # Piaci adatok lekérése a gyorsítótárból
+    df = get_stock_data(ticker, fetch_start, end_date_str)
     
     if df.empty or len(df) < lookback_days + 20:
         return None, "Nincs elég adat az előrejelzéshez."
@@ -122,7 +143,7 @@ if st.sidebar.button("Futtatás"):
     if forecast_days <= 0:
         st.error("Válassz jövőbeli dátumot!")
     else:
-        with st.spinner("Modell letöltése és számítás..."):
+        with st.spinner("Számítás és grafikon rajzolása..."):
             res, err = predict_stock_logic(ticker, start_date.strftime("%Y-%m-%d"), today_str, min(forecast_days, 90))
             
             if err:
